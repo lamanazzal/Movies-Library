@@ -43,6 +43,11 @@ function TopRateMovies (id, title ,overview){
     this.title=title;
     this.overview=overview;
 }
+function Search(title ,poster_path , overview){
+    this.title=title;
+    this.poster_path=poster_path;
+    this.overview=overview
+}
 //function
 function moviesHandler(req, res) {
     let newobjict = new moviesSpecificData(moviesData.title, moviesData.poster_path, moviesData.overview)
@@ -81,10 +86,11 @@ function searchHandler(req, res) {
     let url=`https://api.themoviedb.org/3/search/movie?api_key=${apikey}&language=en-US&query=The&page=2`
     axios.get(url)
     .then((result)=>{
-        let response= result.data.results;
-        console.log(response);
-        res.json(response);
-    })
+        let response= result.data.results.map((movies)=>{
+            return new Search (movies.title ,movies.poster_path , movies.overview)
+        })
+        res.json(response)})
+    
     .catch((err)=>{
         console.log(err)
     })
