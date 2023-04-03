@@ -31,8 +31,6 @@ app.post('/addMovie',addMovieHandler)
 app.get('/getAllMovies',getAllMoviesHandler);
 app.get('*', pageNotFound)
 
-
-
 function addMovieHandler(req,res){
  console.log(req.body);
  let {title,poster,overview} = req.body;
