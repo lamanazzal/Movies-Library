@@ -83,7 +83,7 @@ function trendingHandler(req, res) {
 function searchHandler(req, res) {
     let moviename = req.query.title // name it as you want 
     console.log(moviename)
-    let url=`https://api.themoviedb.org/3/search/movie?api_key=${apikey}&language=en-US&query=The&page=2`
+    let url=`https://api.themoviedb.org/3/search/movie?api_key=${apikey}&language=en-US&query=${moviename}`
     axios.get(url)
     .then((result)=>{
         let response= result.data.results.map((movies)=>{
