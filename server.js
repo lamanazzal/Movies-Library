@@ -3,23 +3,70 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 require('dotenv').config();
+const bodyParser = require('body-parser')
+const { Client } = require('pg')
+let url = `postgres://lama94:0000@localhost:5432/moviedb`;
+const client = new Client(url)
 const app = express();
-const monieData=require('./Movie Data/data.json');
+const movieData=require('./Movie Data/data.json');
 const{json} = require('express');
-app.use(cors());
-
 const port = process.env.port;
 const apikey = process.env.apikey;
+app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false }))
+// parse application/json
+app.use(bodyParser.json());
 
+
+
+//routs
 app.get('/', moviesHandler)
 app.get('/favorite', FavoriteHandler)
 app.get('/trending', trendingHandler)
 app.get('/search', searchHandler)
 app.get('/popular', tvPopularHandler)
 app.get('/top_rated',topRatedMovieshandler)
+
+app.post('/addMovie',addMovieHandler)
+app.get('/getAllMovies',getAllMoviesHandler);
 app.get('*', pageNotFound)
+
+
+
+function addMovieHandler(req,res){
+ console.log(req.body);
+ let {title,poster,overview} = req.body;
+ let sql = `INSERT INTO movietable (title,poster,overview)
+ VALUES ($1,$2,$3) RETURNING *; `
+ let values = [title,poster,overview]
+ client.query(sql,values).then((result)=>{
+     console.log(result.rows)
+     res.status(201).json(result.rows)})
+
+ .catch()
+}
+function getAllMoviesHandler(req,res){
+    let sql =`SELECT * FROM movieTable;`; //read all data from database table
+    client.query(sql).then((result)=>{
+        console.log(result);
+        res.json(result.rows)
+    }).catch()}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // constructors
-function movies(title, poster, overview) {
+function Movies(title, poster, overview) {
     this.title = title;
     this.poster = poster;
     this.overview = overview;
@@ -50,9 +97,11 @@ function Search(title ,poster_path , overview){
 }
 //function
 function moviesHandler(req, res) {
-    let newobjict = new moviesSpecificData(moviesData.title, moviesData.poster_path, moviesData.overview)
-    res.json(newobjict)
-};
+    let result =[];
+    let newMovie = new Movies(movieData.title, movieData.poster_path, movieData.overview)
+    result.push(newMovie);
+    res.json(result);
+}
 
 function FavoriteHandler(req, res) {
     res.send("Welcome to Favorite Page");
@@ -128,7 +177,7 @@ function topRatedMovieshandler(req,res){
         console.log(err)
     })
     }
-
+//errors case 
 app.get("*", (res, req) => {
     res.send("error")
 })
@@ -136,13 +185,14 @@ app.get("*", (res, req) => {
 function pageNotFound(req, res) {
     res.status(404).send("page not found ");
 };
-
 app.use((err, req, res, next) => {
     console.error(err.stack)
     res.status(500).send("server not found")
 })
+//listen
 
+client.connect().then(()=>{
 app.listen(port, () => {
     console.log(`example app listening on port ${port}`)
 })
-
+}).catch()
