@@ -29,14 +29,61 @@ app.get('/top_rated',topRatedMovieshandler)
 
 app.post('/addMovie',addMovieHandler)
 app.get('/getAllMovies',getAllMoviesHandler);
+
+app.put('/UPDATE/:id',updateHandler)
+app.delete('/DELETE/:id',deleteHandler)
+app.get('/getMovie/:id', getHandler)
 app.get('*', pageNotFound)
+
+//get spicefic recourd
+function getHandler(req,res){
+    let idMovie =req.params.id;
+    let sql=`SELECT * FROM movieTable
+    WHERE id = $1 ;` ;
+    let value = [idMovie];
+    client.query(sql,value).then(result=>{
+        res.send(result.rows);
+    }).catch()
+}
+//delete
+function deleteHandler(req,res){
+    let idMovie =req.params.id;
+    let sql=`DELETE FROM movieTable WHERE id = $1;` ;
+    let value = [idMovie];
+    client.query(sql,value).then(result=>{
+        res.status(204).send("deleted");
+    }).catch()
+}
+
+//update 
+
+function updateHandler(req,res){
+let idMovie =req.params.id;//params
+let comment=req.body.comment;
+let sql =`UPDATE movieTable SET comment=$1
+WHERE id=$2 RETURNING* `;
+let values =[comment,idMovie];
+client.query(sql,values).then((result)=>{
+    console.log(result.rows);
+    res.send(result.rows)}).catch()
+}
+
+
+
+
+
+
+
+
+
+
 
 function addMovieHandler(req,res){
  console.log(req.body);
- let {title,poster,overview} = req.body;
- let sql = `INSERT INTO movietable (title,poster,overview)
- VALUES ($1,$2,$3) RETURNING *; `
- let values = [title,poster,overview]
+ let {title,poster,overview,comment} = req.body;
+ let sql = `INSERT INTO movietable (title,poster,overview, comment)
+ VALUES ($1,$2,$3 ,$4) RETURNING *; `
+ let values = [title,poster,overview ,comment]
  client.query(sql,values).then((result)=>{
      console.log(result.rows)
      res.status(201).json(result.rows)})
@@ -44,24 +91,11 @@ function addMovieHandler(req,res){
  .catch()
 }
 function getAllMoviesHandler(req,res){
-    let sql =`SELECT * FROM movieTable;`; //read all data from database table
+    let sql =`SELECT * FROM movieTable `; //read all data from database table
     client.query(sql).then((result)=>{
         console.log(result);
         res.json(result.rows)
     }).catch()}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // constructors
 function Movies(title, poster, overview) {
