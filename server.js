@@ -5,11 +5,12 @@ const axios = require('axios');
 require('dotenv').config();
 const bodyParser = require('body-parser')
 const { Client } = require('pg')
-let url = `postgres://lama94:0000@localhost:5432/moviedb`;
+// let url = `postgres://lama94:0000@localhost:5432/moviedb`;
+let url =process.env.URL
 const client = new Client(url)
 const app = express();
 const movieData=require('./Movie Data/data.json');
-const{json} = require('express');
+// const{json} = require('express');
 const port = process.env.port;
 const apikey = process.env.apikey;
 app.use(cors());
@@ -43,7 +44,9 @@ function getHandler(req,res){
     let value = [idMovie];
     client.query(sql,value).then(result=>{
         res.send(result.rows);
-    }).catch()
+    }).catch(err =>{
+        console.log(err);
+    })
 }
 //delete
 function deleteHandler(req,res){
@@ -52,7 +55,9 @@ function deleteHandler(req,res){
     let value = [idMovie];
     client.query(sql,value).then(result=>{
         res.status(204).send("deleted");
-    }).catch()
+    }).catch(err =>{
+        console.log(err);
+    })
 }
 
 //update 
@@ -65,7 +70,9 @@ WHERE id=$2 RETURNING* `;
 let values =[comment,idMovie];
 client.query(sql,values).then((result)=>{
     console.log(result.rows);
-    res.send(result.rows)}).catch()
+    res.send(result.rows)}).catch(err =>{
+        console.log(err);
+    })
 }
 
 
@@ -88,14 +95,18 @@ function addMovieHandler(req,res){
      console.log(result.rows)
      res.status(201).json(result.rows)})
 
- .catch()
+ .catch(err =>{
+    console.log(err);
+})
 }
 function getAllMoviesHandler(req,res){
     let sql =`SELECT * FROM movieTable `; //read all data from database table
     client.query(sql).then((result)=>{
         console.log(result);
         res.json(result.rows)
-    }).catch()}
+    }).catch(err =>{
+        console.log(err);
+    })}
 
 // constructors
 function Movies(title, poster, overview) {
@@ -227,4 +238,8 @@ client.connect().then(()=>{
 app.listen(port, () => {
     console.log(`example app listening on port ${port}`)
 })
-}).catch()
+}).catch(err =>{
+    console.log('error here');
+
+    console.log(err);
+})
