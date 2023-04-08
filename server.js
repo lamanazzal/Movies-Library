@@ -39,7 +39,7 @@ app.get('*', pageNotFound)
 //get spicefic recourd
 function getHandler(req,res){
     let idMovie =req.params.id;
-    let sql=`SELECT * FROM movieTable
+    let sql=`SELECT * FROM movietable
     WHERE id = $1 ;` ;
     let value = [idMovie];
     client.query(sql,value).then(result=>{
@@ -51,7 +51,7 @@ function getHandler(req,res){
 //delete
 function deleteHandler(req,res){
     let idMovie =req.params.id;
-    let sql=`DELETE FROM movieTable WHERE id = $1;` ;
+    let sql=`DELETE FROM movietable WHERE id = $1;` ;
     let value = [idMovie];
     client.query(sql,value).then(result=>{
         res.status(204).send("deleted");
@@ -65,7 +65,7 @@ function deleteHandler(req,res){
 function updateHandler(req,res){
 let idMovie =req.params.id;//params
 let comment=req.body.comment;
-let sql =`UPDATE movieTable SET comment=$1
+let sql =`UPDATE movietable SET comment=$1
 WHERE id=$2 RETURNING* `;
 let values =[comment,idMovie];
 client.query(sql,values).then((result)=>{
@@ -100,7 +100,7 @@ function addMovieHandler(req,res){
 })
 }
 function getAllMoviesHandler(req,res){
-    let sql =`SELECT * FROM movieTable `; //read all data from database table
+    let sql =`SELECT * FROM movietable `; //read all data from database table
     client.query(sql).then((result)=>{
         console.log(result);
         res.json(result.rows)
